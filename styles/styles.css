@@ -4,18 +4,15 @@ body {
     font-family: 'Courier New', Courier, monospace;
     font-size: min(16px, 4vw);
     
-    /* font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    flex-direction: column;
     margin: 0;
-    background: #f4f4f4; */
 }
 
 header, footer {
     max-width: 800px;
-    margin-inline: auto;
     padding: 0 10px;
 }
 
