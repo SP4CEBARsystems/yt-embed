@@ -52,10 +52,7 @@ export default class EmbedMaker {
 
         iframe.id = 'youtubePlayer';
         iframe.src = src;
-        iframe.title = "lofi hip hop radio 📚 beats to relax/study to";
-        iframe.frameBorder = "0";
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-        iframe.referrerPolicy = "strict-origin-when-cross-origin";
         iframe.allowFullscreen = true;
 
         return iframe;
