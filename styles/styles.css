@@ -16,6 +16,10 @@ header, footer {
     padding: 0 10px;
 }
 
+main {
+    width: 100%;
+}
+
 a:link {
     color: lightblue;
 }
@@ -58,7 +62,6 @@ aside a {
 
 .container {
     width: 100%;
-    max-width: 800px;
     aspect-ratio: 16 / 9;
     background: #000;
 }
