@@ -1,4 +1,5 @@
 import EmbedMaker from "./EmbedMaker.js";
+import MusicDisplay from "./MusicDisplay.js";
 import URIExtractor from "./URIExtractor.js";
 
 let isMinimalPage = false;
@@ -38,6 +39,9 @@ function loadVideo() {
     const iframe = EmbedMaker.createYouTubeIframe(videoId, playlistId);
     container.appendChild(iframe);
     app.appendChild(container);
+    const pElement = document.createElement('p');
+    document.appendChild(pElement);
+    new MusicDisplay(iframe, pElement);
 }
 
 /**
