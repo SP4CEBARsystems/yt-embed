@@ -1,7 +1,10 @@
+let isMinimalPage = false;
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Hello, DOM content loaded");
-    if (getQueryParam('minimal') !== null && getQueryParam('minimal') === "1") {
+    isMinimalPage = getQueryParam('minimal') !== null && getQueryParam('minimal') === "1";
+    if (isMinimalPage) {
         stripPageDown()
+        document.body?.classList.add('full-height');
     }
     loadVideo();
 });
@@ -66,6 +69,11 @@ function loadVideo() {
     
     const container = document.createElement("div");
     container.className = "container";
+    if (isMinimalPage) {
+        container.classList.add('full-height');
+    } else {
+        container.classList.add('aspect-16-9');
+    }
     const iframe = createYouTubeIframe(videoId, playlistId);
     container.appendChild(iframe);
     app.appendChild(container);

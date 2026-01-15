@@ -25,6 +25,20 @@ main {
     width: 100%;
 }
 
+.full-height {
+    height: 100vh;
+}
+
+.aspect-16-9 {
+    aspect-ratio: 16 / 9;
+}
+
+#app {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 a:link {
     color: lightblue;
 }
@@ -57,7 +71,6 @@ aside a {
 
 .container {
     width: 100%;
-    aspect-ratio: 16 / 9;
     background: #000;
 }
 
