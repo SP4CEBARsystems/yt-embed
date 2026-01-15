@@ -12,9 +12,14 @@ body {
 }
 
 header, footer {
-    max-width: 800px;
-    padding: 0 10px;
+    /* max-width: 800px; */
+    width: 100%;
+    margin: 50px 0;
 }
+
+header *, footer * {
+    margin: 0 40px
+} 
 
 main {
     width: 100%;
@@ -34,16 +39,6 @@ a:hover {
 
 a:active {
     color: blue;
-}
-
-header {
-    margin-top: 80px;
-    margin-bottom: 100px;
-    padding: 0 10px;
-}
-
-footer {
-    margin-top: 150px;
 }
 
 aside {
