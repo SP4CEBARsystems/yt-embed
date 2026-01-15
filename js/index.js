@@ -41,6 +41,7 @@ function getParams() {
     }
     const extractedIds = extractYouTubeIds(videoUrl);
     extractedIds.videoId = extractedIds.videoId ?? getQueryParam("v") ?? null;
+    extractedIds.playlistId = extractedIds.playlistId ?? getQueryParam("list") ?? null;
     return extractedIds;
 }
 
