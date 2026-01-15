@@ -73,20 +73,6 @@ function createYouTubeIframe(videoId, playlistId) {
 
     let src;
 
-    // const iframe = document.createElement("iframe");
-    // iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
-    // iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-    // iframe.allowFullscreen = true;
-
-    // <iframe width="560" height="315" 
-    // src="https://www.youtube.com/embed/videoseries?si=6nxfmOauNv9qMkH1&amp;list=PLrINjT-RUPluYFu11hntBQHc9Pp3-Xn_R" 
-    // title="YouTube video player" 
-    // frameborder="0" 
-    // allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-    // referrerpolicy="strict-origin-when-cross-origin" 
-    // allowfullscreen
-    // ></iframe>
-
     if (playlistId && videoId) {
         // Video that is part of a playlist
         src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?list=${encodeURIComponent(playlistId)}`;
