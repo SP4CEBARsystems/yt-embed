@@ -2,11 +2,8 @@ body {
     background-color: black;
     color: white;
     font-family: 'Courier New', Courier, monospace;
-    max-width: 800px;
-    margin-inline: auto;
-    padding: 0 10px;
     font-size: min(16px, 4vw);
-
+    
     /* font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
@@ -14,6 +11,12 @@ body {
     min-height: 100vh;
     margin: 0;
     background: #f4f4f4; */
+}
+
+header, footer {
+    max-width: 800px;
+    margin-inline: auto;
+    padding: 0 10px;
 }
 
 a:link {
