@@ -36,7 +36,7 @@ function getParams() {
     if (!videoUrl) {
         return {
             videoId: getQueryParam("v") ?? null, 
-            playlistId: null
+            playlistId: getQueryParam("list") ?? null
         };
     }
     const extractedIds = extractYouTubeIds(videoUrl);
