@@ -18,19 +18,35 @@ function getQueryParam(name) {
  * @param {string} url 
  * @returns 
  */
-function extractVideoId(url) {
-    const matchVideoId = /(?:youtube\.com\/(?:watch\?.*v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    const match = url.match(matchVideoId);
-    return match ? match[1] : null;
+function extractYouTubeIds(url) {
+    const regex = /(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})|(?:youtube\.com\/(?:playlist|embed\/videoseries)\?(?:.*&)?list=([a-zA-Z0-9_-]+))/;
+    const match = url.match(regex);
+    if (!match) return {
+        videoId: null, 
+        playlistId: null
+    };
+    return {
+        videoId: match[1] || null,
+        playlistId: match[2] || null
+    };
+}
+
+function getParams() {
+    const videoUrl = getQueryParam("u");
+    if (!videoUrl) {
+        return {
+            videoId: getQueryParam("v") ?? null, 
+            playlistId: null
+        };
+    }
+    const extractedIds = extractYouTubeIds(videoUrl);
+    extractedIds.videoId = extractedIds.videoId ?? getQueryParam("v") ?? null;
+    return extractedIds;
 }
 
 function loadVideo() {
-    const videoUrl = getQueryParam("u");
     const app = document.getElementById("app");
-    let videoId;
-    if (videoUrl) {
-        videoId = extractVideoId(videoUrl) ?? getQueryParam("v");
-    }
+    const {videoId, playlistId} = getParams();
 
     if (!app) {
         return;
@@ -41,14 +57,54 @@ function loadVideo() {
     
     const container = document.createElement("div");
     container.className = "container";
-    
-    const iframe = document.createElement("iframe");
-    iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-    iframe.allowFullscreen = true;
-    
+    const iframe = createYouTubeIframe(videoId, playlistId);
     container.appendChild(iframe);
     app.appendChild(container);
+}
+
+/**
+ * Creates a YouTube iframe element for a video and/or playlist.
+ * @param {string|null} videoId
+ * @param {string|null} playlistId
+ * @returns {HTMLIFrameElement}
+ */
+function createYouTubeIframe(videoId, playlistId) {
+    const iframe = document.createElement("iframe");
+
+    let src;
+
+    // const iframe = document.createElement("iframe");
+    // iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
+    // iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    // iframe.allowFullscreen = true;
+
+    // <iframe width="560" height="315" 
+    // src="https://www.youtube.com/embed/videoseries?si=6nxfmOauNv9qMkH1&amp;list=PLrINjT-RUPluYFu11hntBQHc9Pp3-Xn_R" 
+    // title="YouTube video player" 
+    // frameborder="0" 
+    // allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+    // referrerpolicy="strict-origin-when-cross-origin" 
+    // allowfullscreen
+    // ></iframe>
+
+    if (playlistId && videoId) {
+        // Video that is part of a playlist
+        src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?list=${encodeURIComponent(playlistId)}`;
+    } else if (playlistId) {
+        // Playlist only
+        src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(playlistId)}`;
+    } else if (videoId) {
+        // Single video
+        src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
+    } else {
+        throw new Error("No videoId or playlistId provided");
+    }
+
+    iframe.src = src;
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+
+    return iframe;
 }
 
 /**
