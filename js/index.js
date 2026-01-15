@@ -1,7 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Hello, DOM content loaded");
+    if (getQueryParam('minimal') !== null && getQueryParam('minimal') === "1") {
+        stripPageDown()
+    }
     loadVideo();
 });
+
+function stripPageDown() {
+    document.querySelector('header')?.remove();
+    document.querySelector('footer')?.remove();
+}
 
 /**
  * Gets a query parameter value by name.
