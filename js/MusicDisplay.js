@@ -14,10 +14,12 @@ export default class MusicDisplay {
      * Creates a status display for YouTube embed iFrames that is updated by the youtube API
      * @param {HTMLIFrameElement} ytEl 
      * @param {HTMLElement} musicDetail 
+     * @param {string} label 
      */
-    constructor(ytEl, musicDetail) {
+    constructor(ytEl, musicDetail, label = 'Video: ') {
         this.ytEl = ytEl;
         this.musicDetail = musicDetail;
+        this.label = label;
         
         this.window = /** @type {WindowWithYTAPI} */(window);
         /** @type {Document} */
@@ -80,9 +82,9 @@ export default class MusicDisplay {
                     // set initial status
                     try {
                         const s = e.target.getPlayerState();
-                        this.setStatusText(s);
+                        this.setStatusText(s, true);
                     } catch (err) {
-                        this.setStatusText(-1);
+                        this.setStatusText(-1, true);
                     }
                 },
                 /** @param {{data:number}} e */
@@ -96,8 +98,9 @@ export default class MusicDisplay {
     /**
      * Interprets YouTube embed video state and displays it on the this.musicDetail element.
      * @param {number} state 
+     * @param {boolean} isReady
      */
-    setStatusText(state) {
+    setStatusText(state, isReady = false) {
         let status;
         switch (state) {
             case 1: status = 'Playing'; break;       // YT.PlayerState.PLAYING
@@ -107,6 +110,14 @@ export default class MusicDisplay {
             case -1: status = 'Unstarted'; break;    // YT.PlayerState.UNSTARTED
             default: status = 'Stopped';
         }
-        this.musicDetail.textContent = `Music: ${status}`;
+        if (isReady) {
+            switch (state) {
+                case -1: 
+                    status = 'Error'; 
+                    // this.onError();
+                    break;    // YT.PlayerState.UNSTARTED
+            }
+        }
+        this.musicDetail.textContent = `${this.label}${status}`;
     }
 }
