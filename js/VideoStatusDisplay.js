@@ -49,16 +49,24 @@ export default class VideoStatusDisplay {
         } else {
             // load the IFrame API if not already loaded
             this.createScriptTag('https://www.youtube.com/iframe_api');
-            const prev = this.window.onYouTubeIframeAPIReady;
-            this.window.onYouTubeIframeAPIReady = () => {
-                if (typeof prev === 'function') prev();
-                this.createPlayer();
-            };
+            this.assignToYTAPIHook(this.createPlayer.bind(this));
         }
     }
 
     /**
-     * creates a script element as a child of this.document.head
+     * Assigns an additional function to the this.window.onYouTubeIframeAPIReady hook
+     * @param {()=>any} callback the new function to be assigned
+     */
+    assignToYTAPIHook(callback) {
+            const prev = this.window.onYouTubeIframeAPIReady;
+            this.window.onYouTubeIframeAPIReady = () => {
+                if (typeof prev === 'function') prev();
+            callback();
+            };
+    }
+
+    /**
+     * creates a script element named 'tag' as a child of this.document.head
      * @param {string} tagUrl source of the script
      */
     createScriptTag(tagUrl) {
