@@ -20,6 +20,7 @@ export default class MusicDisplay {
         this.ytEl = ytEl;
         this.musicDetail = musicDetail;
         this.label = label;
+        this.onError = null;
         
         this.window = /** @type {WindowWithYTAPI} */(window);
         /** @type {Document} */
@@ -114,7 +115,7 @@ export default class MusicDisplay {
             switch (state) {
                 case -1: 
                     status = 'Error'; 
-                    // this.onError();
+                    this?.onError();
                     break;    // YT.PlayerState.UNSTARTED
             }
         }

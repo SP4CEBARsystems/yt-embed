@@ -1,3 +1,5 @@
+import AsyncHelpers from "./AsyncHelpers.js";
+
 export default class EmbedMaker {
     /**
      * 
@@ -32,20 +34,21 @@ export default class EmbedMaker {
      * @param {string|null} playlistId
      * @returns {HTMLIFrameElement}
      */
-    static createYouTubeIframe(videoId, playlistId) {
+    static createYouTubeIframe(videoId, playlistId, isJsApiEnabled = false) {
         const iframe = document.createElement("iframe");
-
         let src;
+        const queries = isJsApiEnabled ? 'enablejsapi=1' : '';
+        // const queries = '';
 
         if (playlistId && videoId) {
             // Video that is part of a playlist
-            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?list=${encodeURIComponent(playlistId)}`;
+            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?list=${encodeURIComponent(playlistId)}${queries? '&' : ''}${queries}`;
         } else if (playlistId) {
             // Playlist only
-            src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(playlistId)}`;
+            src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(playlistId)}${queries? '&' : ''}${queries}`;
         } else if (videoId) {
             // Single video
-            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
+            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}${queries? '?' : ''}${queries}`;
         } else {
             throw new Error("No videoId or playlistId provided");
         }
@@ -56,5 +59,15 @@ export default class EmbedMaker {
         iframe.allowFullscreen = true;
 
         return iframe;
+    }
+
+    /**
+     * Adds an iframe to a container element and waits for at least one iframe to be detected on that container element.
+     * @param {HTMLElement} container 
+     * @param {HTMLIFrameElement} iframe 
+     */
+    static async appendToElement(container, iframe) {
+        container.appendChild(iframe);
+        return AsyncHelpers.waitForElement('iframe', container);
     }
 }
