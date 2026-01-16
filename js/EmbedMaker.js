@@ -11,7 +11,12 @@ export default class EmbedMaker {
      * @param {HTMLElement} [statusDisplayElement]
      */
     constructor(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement) {
-        this.createYouTubeIframe(videoId, playlistId, isJsApiEnabled, parentElement, statusDisplayElement);
+        this.videoId = videoId;
+        this.playlistId = playlistId;
+        this.isJsApiEnabled = isJsApiEnabled;
+        this.parentElement = parentElement;
+        this.statusDisplayElement = statusDisplayElement;
+        this.createYouTubeIframe();
     }
     
     /**
@@ -54,7 +59,13 @@ export default class EmbedMaker {
      * @param {HTMLElement} [statusDisplayElement]
      * @returns {Promise<HTMLIFrameElement>}
      */
-    async createYouTubeIframe(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement) {
+    async createYouTubeIframe(
+        videoId = this.videoId ?? null, 
+        playlistId = this.playlistId ?? null, 
+        isJsApiEnabled = this.isJsApiEnabled ?? false, 
+        parentElement = this.parentElement, 
+        statusDisplayElement = this.statusDisplayElement
+    ) {
         const iframe = document.createElement("iframe");
         this.iframe = iframe;
         iframe.id = 'youtubePlayer';
