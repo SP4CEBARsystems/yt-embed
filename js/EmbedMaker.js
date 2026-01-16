@@ -78,7 +78,7 @@ export default class EmbedMaker {
             await EmbedMaker.appendToElement(parentElement, iframe);
         }
         if (statusDisplayElement) {
-            this.display = new VideoStatusDisplay(iframe, statusDisplayElement);
+            this.display = new VideoStatusDisplay(statusDisplayElement, iframe);
             if (this.display) this.display.onError = this.reset.bind(this);
         }
         return iframe;

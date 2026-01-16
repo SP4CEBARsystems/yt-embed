@@ -21,11 +21,11 @@ export default class VideoStatusDisplay {
 
     /**
      * Creates a status display for YouTube embed iFrames that is updated by the youtube API
-     * @param {HTMLIFrameElement} ytEl 
      * @param {HTMLElement} musicDetail 
+     * @param {HTMLIFrameElement} [ytEl] 
      * @param {string} label 
      */
-    constructor(ytEl, musicDetail, label = 'Video: ') {
+    constructor(musicDetail, ytEl, label = 'Video: ') {
         this.ytEl = ytEl;
         this.musicDetail = musicDetail;
         this.label = label;
@@ -34,15 +34,33 @@ export default class VideoStatusDisplay {
         this.window = /** @type {WindowWithYTAPI} */(window);
         /** @type {Document} */
         this.document = document;
-        this.src = this.ytEl.getAttribute('src') || '';
+        if (this.ytEl) {
+            this.enableJsApi();
+            this.prepareCreatePlayer();
+        }
+    }
+
+    /**
+     * 
+     * @param {HTMLIFrameElement} ytEl 
+     */
+    reset(ytEl) {
+        this.ytEl = ytEl;
+        this.destroy();
         this.enableJsApi();
         this.prepareCreatePlayer();
+    }
+
+    destroy() {
+        this.youtubePlayer?.destroy();
     }
 
     /**
      * Ensure iframe has enablejsapi=1 so the JS API can control it
      */
     enableJsApi() {
+        if (!this.ytEl) return;
+        this.src = this.ytEl.getAttribute('src') || '';
         const isJsApiEnabled = /(\?|&)enablejsapi=1/.test(this.src);
         if (isJsApiEnabled) return;
         const separator = this.src.includes('?') ? '&' : '?';
@@ -67,11 +85,11 @@ export default class VideoStatusDisplay {
      * @param {()=>any} callback the new function to be assigned
      */
     assignToYTAPIHook(callback) {
-            const prev = this.window.onYouTubeIframeAPIReady;
-            this.window.onYouTubeIframeAPIReady = () => {
-                if (typeof prev === 'function') prev();
+        const prev = this.window.onYouTubeIframeAPIReady;
+        this.window.onYouTubeIframeAPIReady = () => {
+            if (typeof prev === 'function') prev();
             callback();
-            };
+        };
     }
 
     /**
