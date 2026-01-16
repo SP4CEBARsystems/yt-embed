@@ -45,26 +45,6 @@ async function loadVideo() {
     pElement.id = 'statusDisplay'
     document.querySelector('main')?.appendChild(pElement);
     const iframeManager = new EmbedMaker(videoId, playlistId, true, container, pElement);
-    if (iframeManager.display) iframeManager.display.onError = resetIframe;
-}
-
-/**
- * 
- * @param {string|null} videoId 
- * @returns 
- */
-async function resetIframe(videoId = mainVideoId) {
-    const container = /** @type {HTMLElement} */(document.querySelector('.container'));
-    if (!container) return;
-    const oldIframe = container.querySelector('iframe');
-    oldIframe?.remove();
-    let pElement = document.getElementById('statusDisplay');
-    if (!pElement) {
-        pElement = document.createElement('p');
-        pElement.id = 'statusDisplay'
-        document.querySelector('main')?.appendChild(pElement);
-    }
-    const iframe = new EmbedMaker(videoId, null, true, container, pElement);
 }
 
 /**

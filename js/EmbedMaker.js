@@ -16,6 +16,7 @@ export default class EmbedMaker {
         this.isJsApiEnabled = isJsApiEnabled;
         this.parentElement = parentElement;
         this.statusDisplayElement = statusDisplayElement;
+        this.resetCount = 0;
         this.createYouTubeIframe();
     }
     
@@ -78,8 +79,23 @@ export default class EmbedMaker {
         }
         if (statusDisplayElement) {
             this.display = new MusicDisplay(iframe, statusDisplayElement);
+            if (this.display) this.display.onError = this.reset.bind(this);
         }
         return iframe;
+    }
+
+    async reset() {
+        if (!this.parentElement || !this.statusDisplayElement) return;
+        this.resetCount++;
+        const resetAttempts = this.playlistId ? 1 : 0;
+        if (this.resetCount <= resetAttempts) {
+            const oldIframe = this.parentElement.querySelector('iframe');
+            oldIframe?.remove();
+            const isPlaylistIncluded = this.resetCount !== 1;
+            this.iframe = await this.createYouTubeIframe(this.videoId, isPlaylistIncluded ? this.playlistId : null);
+        // } else {
+            // this.statusDisplayElement.textContent;
+        }
     }
 
     /**
