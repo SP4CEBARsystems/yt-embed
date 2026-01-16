@@ -84,14 +84,14 @@ export default class EmbedMaker {
         return iframe;
     }
 
-    async reset() {
+    reset() {
         if (!this.parentElement || !this.statusDisplayElement) return;
         this.resetCount++;
         const resetAttempts = this.playlistId ? 1 : 0;
         if (this.resetCount > resetAttempts) return;
         const isPlaylistIncluded = this.resetCount !== 1;
         this.iframe?.remove();
-        this.iframe = await this.createYouTubeIframe(this.videoId, isPlaylistIncluded ? this.playlistId : null);
+        this.createYouTubeIframe(this.videoId, isPlaylistIncluded ? this.playlistId : null);
     }
 
     /**
