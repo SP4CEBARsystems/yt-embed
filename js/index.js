@@ -1,5 +1,5 @@
 import EmbedMaker from "./EmbedMaker.js";
-import VideoStatusDisplay from "./MusicDisplay.js";
+import VideoStatusDisplay from "./VideoStatusDisplay.js";
 import URIExtractor from "./URIExtractor.js";
 
 let isMinimalPage = false;

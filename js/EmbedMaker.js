@@ -1,5 +1,5 @@
 import AsyncHelpers from "./AsyncHelpers.js";
-import VideoStatusDisplay from "./MusicDisplay.js";
+import VideoStatusDisplay from "./VideoStatusDisplay.js";
 
 export default class EmbedMaker {
     /**
