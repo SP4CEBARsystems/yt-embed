@@ -64,13 +64,13 @@ async function resetIframe(videoId = mainVideoId) {
     oldIframe?.remove();
     const iframe = EmbedMaker.createYouTubeIframe(videoId, null, true);
     await EmbedMaker.appendToElement(container, iframe);
-    // let pElement = document.getElementById('statusDisplay');
-    // if (!pElement) {
-    //     pElement = document.createElement('p');
-    //     pElement.id = 'statusDisplay'
-    //     document.querySelector('main')?.appendChild(pElement);
-    // }
-    // if (iframe && pElement) new MusicDisplay(iframe, pElement);
+    let pElement = document.getElementById('statusDisplay');
+    if (!pElement) {
+        pElement = document.createElement('p');
+        pElement.id = 'statusDisplay'
+        document.querySelector('main')?.appendChild(pElement);
+    }
+    if (iframe && pElement) new MusicDisplay(iframe, pElement);
 }
 
 /**
