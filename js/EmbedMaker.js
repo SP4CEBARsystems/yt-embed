@@ -20,7 +20,7 @@ export default class EmbedMaker {
         this.statusDisplayLabel = statusDisplayLabel;
         this.resetCount = 0;
         this.resetDisplay();
-        this.createYouTubeIframe();
+        this.iframePromise = this.createYouTubeIframe();
     }
     
     /**

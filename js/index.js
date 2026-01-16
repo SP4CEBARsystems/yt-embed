@@ -45,6 +45,10 @@ async function loadVideo() {
     pElement.id = 'statusDisplay'
     document.querySelector('main')?.appendChild(pElement);
     const iframeManager = new EmbedMaker(videoId, playlistId, true, container, pElement);
+    iframeManager?.iframePromise?.then((iframe)=>{
+        iframe.focus();
+        console.log('focusing')
+    });
     // leakTest(iframeManager, 10000000);
 }
 
