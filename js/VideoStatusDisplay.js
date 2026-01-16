@@ -1,6 +1,6 @@
 /**
  * @typedef YTObject 
- * @property {new (...args: any[]) => Object|undefined} Player
+ * @property {new (...args: any[]) => YTPlayer|undefined} Player
  * 
  * @typedef YTAPI 
  * @property {()=>void|undefined} onYouTubeIframeAPIReady
@@ -10,6 +10,15 @@
  */
 
 export default class VideoStatusDisplay {
+    /** 
+     * @typedef {Object} YTPlayer
+     * @property {()=>any} destroy
+     */
+    /** 
+     * @type {YTPlayer|undefined} 
+     */
+    youtubePlayer
+
     /**
      * Creates a status display for YouTube embed iFrames that is updated by the youtube API
      * @param {HTMLIFrameElement} ytEl 
@@ -20,8 +29,8 @@ export default class VideoStatusDisplay {
         this.ytEl = ytEl;
         this.musicDetail = musicDetail;
         this.label = label;
+        /** @type {Function|null} */
         this.onError = null;
-        
         this.window = /** @type {WindowWithYTAPI} */(window);
         /** @type {Document} */
         this.document = document;
@@ -116,17 +125,13 @@ export default class VideoStatusDisplay {
             case 2: status = 'Paused'; break;        // YT.PlayerState.PAUSED
             case 0: status = 'Ended'; break;         // YT.PlayerState.ENDED
             case 3: status = 'Buffering'; break;     // YT.PlayerState.BUFFERING
-            case -1: status = 'Unstarted'; break;    // YT.PlayerState.UNSTARTED
+            case -1: status = isReady ? 'Error' : 'Unstarted'; break;    // YT.PlayerState.UNSTARTED
             default: status = 'Stopped';
         }
-        if (isReady) {
-            switch (state) {
-                case -1: 
-                    status = 'Error'; 
-                    this?.onError();
-                    break;    // YT.PlayerState.UNSTARTED
-            }
-        }
         this.musicDetail.textContent = `${this.label}${status}`;
+        const isError = isReady && state == -1;
+        if (isError) {
+            if (this?.onError) this?.onError();
+        }
     }
 }
