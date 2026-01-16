@@ -1,6 +1,19 @@
 import AsyncHelpers from "./AsyncHelpers.js";
+import MusicDisplay from "./MusicDisplay.js";
 
 export default class EmbedMaker {
+    /**
+     * Creates a YouTube iframe element for a video and/or playlist.
+     * @param {string|null} [videoId]
+     * @param {string|null} [playlistId]
+     * @param {boolean} [isJsApiEnabled]
+     * @param {HTMLElement} [parentElement]
+     * @param {HTMLElement} [statusDisplayElement]
+     */
+    constructor(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement) {
+        this.createYouTubeIframe(videoId, playlistId, isJsApiEnabled, parentElement, statusDisplayElement);
+    }
+    
     /**
      * 
      * @param {string} url 
@@ -22,43 +35,66 @@ export default class EmbedMaker {
     /**
      * 
      * @param {string} url 
+     * @param {boolean} [isJsApiEnabled]
+     * @param {HTMLElement} [parentElement]
+     * @param {HTMLElement} [statusDisplayElement]
+     * @returns {Promise<HTMLIFrameElement>}
      */
-    static createYouTubeIframeFromUrl(url) {
+    createYouTubeIframeFromUrl(url, isJsApiEnabled = false, parentElement, statusDisplayElement) {
         const {videoId, playlistId} = EmbedMaker.extractYouTubeIds(url);
-        this.createYouTubeIframe(videoId, playlistId);
+        return this.createYouTubeIframe(videoId, playlistId, isJsApiEnabled, parentElement, statusDisplayElement);
     }
 
     /**
      * Creates a YouTube iframe element for a video and/or playlist.
-     * @param {string|null} videoId
-     * @param {string|null} playlistId
-     * @returns {HTMLIFrameElement}
+     * @param {string|null} [videoId]
+     * @param {string|null} [playlistId]
+     * @param {boolean} [isJsApiEnabled]
+     * @param {HTMLElement} [parentElement]
+     * @param {HTMLElement} [statusDisplayElement]
+     * @returns {Promise<HTMLIFrameElement>}
      */
-    static createYouTubeIframe(videoId, playlistId, isJsApiEnabled = false) {
+    async createYouTubeIframe(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement) {
         const iframe = document.createElement("iframe");
-        let src;
-        const queries = isJsApiEnabled ? 'enablejsapi=1' : '';
-        // const queries = '';
-
-        if (playlistId && videoId) {
-            // Video that is part of a playlist
-            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?list=${encodeURIComponent(playlistId)}${queries? '&' : ''}${queries}`;
-        } else if (playlistId) {
-            // Playlist only
-            src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(playlistId)}${queries? '&' : ''}${queries}`;
-        } else if (videoId) {
-            // Single video
-            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}${queries? '?' : ''}${queries}`;
-        } else {
-            throw new Error("No videoId or playlistId provided");
-        }
-
+        this.iframe = iframe;
         iframe.id = 'youtubePlayer';
-        iframe.src = src;
+        iframe.src = EmbedMaker.getSrc(playlistId, videoId, isJsApiEnabled);
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
         iframe.allowFullscreen = true;
 
+        if (parentElement) {
+            await EmbedMaker.appendToElement(parentElement, iframe);
+        }
+        if (statusDisplayElement) {
+            this.display = new MusicDisplay(iframe, statusDisplayElement);
+        }
         return iframe;
+    }
+
+    /**
+     * 
+     * @param {string|null} [playlistId] 
+     * @param {string|null} [videoId] 
+     * @param {boolean} [isJsApiEnabled] 
+     * @returns {string}
+     */
+    static getSrc(playlistId = null, videoId = null, isJsApiEnabled = false) {
+        let src;
+        const queries = isJsApiEnabled ? 'enablejsapi=1' : '';
+        // const queries = '';
+        if (playlistId && videoId) {
+            // Video that is part of a playlist
+            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?list=${encodeURIComponent(playlistId)}${queries ? '&' : ''}${queries}`;
+        } else if (playlistId) {
+            // Playlist only
+            src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(playlistId)}${queries ? '&' : ''}${queries}`;
+        } else if (videoId) {
+            // Single video
+            src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}${queries ? '?' : ''}${queries}`;
+        } else {
+            throw new Error("No videoId or playlistId provided");
+        }
+        return src;
     }
 
     /**

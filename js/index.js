@@ -40,16 +40,12 @@ async function loadVideo() {
     } else {
         container.classList.add('aspect-16-9');
     }
-    const iframe = EmbedMaker.createYouTubeIframe(videoId, playlistId, true);
-    await EmbedMaker.appendToElement(container, iframe);
     app.appendChild(container);
     const pElement = document.createElement('p');
     pElement.id = 'statusDisplay'
     document.querySelector('main')?.appendChild(pElement);
-    if (iframe && pElement) {
-        const musicDisplay = new MusicDisplay(iframe, pElement);
-        musicDisplay.onError = resetIframe;
-    }
+    const iframeManager = new EmbedMaker(videoId, playlistId, true, container, pElement);
+    if (iframeManager.display) iframeManager.display.onError = resetIframe;
 }
 
 /**
@@ -58,19 +54,17 @@ async function loadVideo() {
  * @returns 
  */
 async function resetIframe(videoId = mainVideoId) {
-    const container = document.querySelector('.container');
+    const container = /** @type {HTMLElement} */(document.querySelector('.container'));
     if (!container) return;
     const oldIframe = container.querySelector('iframe');
     oldIframe?.remove();
-    const iframe = EmbedMaker.createYouTubeIframe(videoId, null, true);
-    await EmbedMaker.appendToElement(container, iframe);
     let pElement = document.getElementById('statusDisplay');
     if (!pElement) {
         pElement = document.createElement('p');
         pElement.id = 'statusDisplay'
         document.querySelector('main')?.appendChild(pElement);
     }
-    if (iframe && pElement) new MusicDisplay(iframe, pElement);
+    const iframe = new EmbedMaker(videoId, null, true, container, pElement);
 }
 
 /**
