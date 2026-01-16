@@ -9,13 +9,15 @@ export default class EmbedMaker {
      * @param {boolean} [isJsApiEnabled]
      * @param {HTMLElement} [parentElement]
      * @param {HTMLElement} [statusDisplayElement]
+     * @param {string} [statusDisplayLabel]
      */
-    constructor(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement) {
+    constructor(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement, statusDisplayLabel) {
         this.videoId = videoId;
         this.playlistId = playlistId;
         this.isJsApiEnabled = isJsApiEnabled;
         this.parentElement = parentElement;
         this.statusDisplayElement = statusDisplayElement;
+        this.statusDisplayLabel = statusDisplayLabel;
         this.resetCount = 0;
         this.resetDisplay();
         this.createYouTubeIframe();
@@ -89,7 +91,7 @@ export default class EmbedMaker {
                 this.display.reset(this.iframe);
             }
         } else {
-            this.display = new VideoStatusDisplay(this.statusDisplayElement, this.iframe);
+            this.display = new VideoStatusDisplay(this.statusDisplayElement, this.iframe, this.statusDisplayLabel);
             if (this.display) this.display.onError = this.onVideoError.bind(this);
         }
     }
