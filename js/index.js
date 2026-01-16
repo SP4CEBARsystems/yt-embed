@@ -1,7 +1,11 @@
 import EmbedMaker from "./EmbedMaker.js";
+import MusicDisplay from "./MusicDisplay.js";
 import URIExtractor from "./URIExtractor.js";
 
 let isMinimalPage = false;
+/** @type {string|null} */
+let mainVideoId = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Hello, DOM content loaded");
     isMinimalPage = URIExtractor.getQueryParam('minimal') !== null && URIExtractor.getQueryParam('minimal') === "1";
@@ -17,9 +21,10 @@ function stripPageDown() {
     document.querySelector('footer')?.remove();
 }
 
-function loadVideo() {
+async function loadVideo() {
     const app = document.getElementById("app");
     const {videoId, playlistId} = URIExtractor.getVideoParams();
+    mainVideoId = videoId;
 
     if (!app) {
         return;
@@ -35,9 +40,37 @@ function loadVideo() {
     } else {
         container.classList.add('aspect-16-9');
     }
-    const iframe = EmbedMaker.createYouTubeIframe(videoId, playlistId);
-    container.appendChild(iframe);
+    const iframe = EmbedMaker.createYouTubeIframe(videoId, playlistId, true);
+    await EmbedMaker.appendToElement(container, iframe);
     app.appendChild(container);
+    const pElement = document.createElement('p');
+    pElement.id = 'statusDisplay'
+    document.querySelector('main')?.appendChild(pElement);
+    if (iframe && pElement) {
+        const musicDisplay = new MusicDisplay(iframe, pElement);
+        musicDisplay.onError = resetIframe;
+    }
+}
+
+/**
+ * 
+ * @param {string|null} videoId 
+ * @returns 
+ */
+async function resetIframe(videoId = mainVideoId) {
+    const container = document.querySelector('.container');
+    if (!container) return;
+    const oldIframe = container.querySelector('iframe');
+    oldIframe?.remove();
+    const iframe = EmbedMaker.createYouTubeIframe(videoId, null, true);
+    await EmbedMaker.appendToElement(container, iframe);
+    let pElement = document.getElementById('statusDisplay');
+    if (!pElement) {
+        pElement = document.createElement('p');
+        pElement.id = 'statusDisplay'
+        document.querySelector('main')?.appendChild(pElement);
+    }
+    if (iframe && pElement) new MusicDisplay(iframe, pElement);
 }
 
 /**
