@@ -17,6 +17,7 @@ export default class EmbedMaker {
         this.parentElement = parentElement;
         this.statusDisplayElement = statusDisplayElement;
         this.resetCount = 0;
+        this.resetDisplay();
         this.createYouTubeIframe();
     }
     
@@ -77,21 +78,34 @@ export default class EmbedMaker {
         if (parentElement) {
             await EmbedMaker.appendToElement(parentElement, iframe);
         }
-        if (statusDisplayElement) {
-            this.display = new VideoStatusDisplay(statusDisplayElement, iframe);
-            if (this.display) this.display.onError = this.reset.bind(this);
-        }
+        this.resetDisplay();
         return iframe;
     }
 
-    reset() {
-        if (!this.parentElement || !this.statusDisplayElement) return;
+    resetDisplay() {
+        if (!this.statusDisplayElement) return;
+        if (this.display) {
+            if (this.iframe) {
+                this.display.reset(this.iframe);
+            }
+        } else {
+            this.display = new VideoStatusDisplay(this.statusDisplayElement, this.iframe);
+            if (this.display) this.display.onError = this.onVideoError.bind(this);
+        }
+    }
+
+    onVideoError() {
         this.resetCount++;
         const resetAttempts = this.playlistId ? 1 : 0;
         if (this.resetCount > resetAttempts) return;
         const isPlaylistIncluded = this.resetCount !== 1;
         this.iframe?.remove();
         this.createYouTubeIframe(this.videoId, isPlaylistIncluded ? this.playlistId : null);
+    }
+
+    destroy() {
+        this.display?.destroy();
+        this.iframe?.remove();
     }
 
     /**

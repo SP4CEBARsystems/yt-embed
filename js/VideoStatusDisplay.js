@@ -53,6 +53,7 @@ export default class VideoStatusDisplay {
 
     destroy() {
         this.youtubePlayer?.destroy();
+        this.youtubePlayer = undefined;
     }
 
     /**
