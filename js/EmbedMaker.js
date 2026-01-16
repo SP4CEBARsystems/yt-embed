@@ -1,5 +1,5 @@
 import AsyncHelpers from "./AsyncHelpers.js";
-import MusicDisplay from "./MusicDisplay.js";
+import VideoStatusDisplay from "./MusicDisplay.js";
 
 export default class EmbedMaker {
     /**
@@ -78,7 +78,7 @@ export default class EmbedMaker {
             await EmbedMaker.appendToElement(parentElement, iframe);
         }
         if (statusDisplayElement) {
-            this.display = new MusicDisplay(iframe, statusDisplayElement);
+            this.display = new VideoStatusDisplay(iframe, statusDisplayElement);
             if (this.display) this.display.onError = this.reset.bind(this);
         }
         return iframe;

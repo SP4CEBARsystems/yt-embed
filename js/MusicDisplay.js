@@ -9,7 +9,7 @@
  * @typedef {Window & typeof globalThis & YTAPI} WindowWithYTAPI
  */
 
-export default class MusicDisplay {
+export default class VideoStatusDisplay {
     /**
      * Creates a status display for YouTube embed iFrames that is updated by the youtube API
      * @param {HTMLIFrameElement} ytEl 
