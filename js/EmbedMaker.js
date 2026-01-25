@@ -164,7 +164,7 @@ export default class EmbedMaker {
         if (videoTime !== null) {
             queriesArray.push(`t=${videoTime}`);
         }
-        const queries = queriesArray.length === 0 ? '' : `$?{queriesArray.join('&')}`;
+        const queries = queriesArray.length === 0 ? '' : `?${queriesArray.join('&')}`;
         
         if (playlistId && videoId) {
             // Video that is part of a playlist
