@@ -44,6 +44,18 @@ export default class EmbedMaker {
     /**
      * 
      * @param {string} url 
+     * @returns 
+     */
+    static extractYouTubeTime(url) {
+        const regex = /(?:\?|&)t=([a-zA-Z0-9_-]+)/;
+        const match = url.match(regex);
+        if (!match) return null;
+        return match[1] || null;
+    }
+
+    /**
+     * 
+     * @param {string} url 
      * @param {boolean} [isJsApiEnabled]
      * @param {HTMLElement} [parentElement]
      * @param {HTMLElement} [statusDisplayElement]
@@ -51,7 +63,8 @@ export default class EmbedMaker {
      */
     createYouTubeIframeFromUrl(url, isJsApiEnabled = false, parentElement, statusDisplayElement) {
         const {videoId, playlistId} = EmbedMaker.extractYouTubeIds(url);
-        return this.createYouTubeIframe(videoId, playlistId, isJsApiEnabled, parentElement, statusDisplayElement);
+        const videoTime = EmbedMaker.extractYouTubeTime(url);
+        return this.createYouTubeIframe(videoId, playlistId, isJsApiEnabled, parentElement, statusDisplayElement, true, videoTime);
     }
 
     /**
@@ -62,6 +75,7 @@ export default class EmbedMaker {
      * @param {HTMLElement} [parentElement]
      * @param {HTMLElement} [statusDisplayElement]
      * @param {boolean} [resetResetCount]
+     * @param {string|null} [videoTime]
      * @returns {Promise<HTMLIFrameElement>}
      */
     async createYouTubeIframe(
@@ -70,7 +84,8 @@ export default class EmbedMaker {
         isJsApiEnabled = this.isJsApiEnabled ?? false, 
         parentElement = this.parentElement, 
         statusDisplayElement = this.statusDisplayElement,
-        resetResetCount = true
+        resetResetCount = true,
+        videoTime = this.videoTime ?? null
     ) {
         if (resetResetCount) {
             this.resetCount = 0;
@@ -81,10 +96,13 @@ export default class EmbedMaker {
         if (playlistId && playlistId !== this.playlistId) {
             this.playlistId = playlistId;
         }
+        if (videoTime && videoTime !== this.videoTime) {
+            this.videoTime = videoTime;
+        }
         this.isJsApiEnabled = isJsApiEnabled;
         this.parentElement = parentElement;
         this.statusDisplayElement = statusDisplayElement;
-        const newSrc = EmbedMaker.getSrc(playlistId, videoId, isJsApiEnabled);
+        const newSrc = EmbedMaker.getSrc(playlistId, videoId, isJsApiEnabled, videoTime);
         if (this.iframe?.src && this.iframe?.src === newSrc) {
             // identical
             return this.iframe;
@@ -134,12 +152,20 @@ export default class EmbedMaker {
      * @param {string|null} [playlistId] 
      * @param {string|null} [videoId] 
      * @param {boolean} [isJsApiEnabled] 
+     * @param {string|null} [videoTime]
      * @returns {string}
      */
-    static getSrc(playlistId = null, videoId = null, isJsApiEnabled = false) {
+    static getSrc(playlistId = null, videoId = null, isJsApiEnabled = false, videoTime = null) {
         let src;
-        const queries = isJsApiEnabled ? 'enablejsapi=1' : '';
-        // const queries = '';
+        const queriesArray = [];
+        if (isJsApiEnabled) {
+            queriesArray.push('enablejsapi=1');
+        }
+        if (videoTime !== null) {
+            queriesArray.push(`t=${videoTime}`);
+        }
+        const queries = queriesArray.length === 0 ? '' : `$?{queriesArray.join('&')}`;
+        
         if (playlistId && videoId) {
             // Video that is part of a playlist
             src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?list=${encodeURIComponent(playlistId)}${queries ? '&' : ''}${queries}`;
