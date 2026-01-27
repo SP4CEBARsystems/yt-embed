@@ -48,6 +48,11 @@ async function loadVideo() {
     // leakTest(iframeManager, 10000000);
 }
 
+/**
+ * 
+ * @param {EmbedMaker} iframeManager 
+ * @param {number} count 
+ */
 function leakTest(iframeManager, count = 1000) {
     console.log('leaktest start')
     for (let index = 0; index < count; index++) {        
