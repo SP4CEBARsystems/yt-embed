@@ -28,8 +28,8 @@ async function loadVideo() {
 
     if (!app) {
         return;
-    } else if (!videoId || !playlistId) {
-        showError(app, 'Missing "v" or "list" parameter in the URL.');
+    } else if (!videoId && !playlistId) {
+        showError(app, 'Missing "v" and "list" parameter in the URL.');
         return;
     }
     
