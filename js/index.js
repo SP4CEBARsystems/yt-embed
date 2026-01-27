@@ -45,6 +45,7 @@ async function loadVideo() {
     pElement.id = 'statusDisplay'
     document.querySelector('main')?.appendChild(pElement);
     const iframeManager = new EmbedMaker(videoId, playlistId, true, container, pElement);
+    // const iframeManager = new EmbedMaker(defaultYTId, null, true, this.iframeContainer ?? undefined, this.status ?? undefined, statusLabel, iframeElementId, defaultTimestamp);
     // leakTest(iframeManager, 10000000);
 }
 
