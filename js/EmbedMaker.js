@@ -1,26 +1,33 @@
 import AsyncHelpers from "./AsyncHelpers.js";
+import DeferredManager from "./DeferredManager.js";
 import VideoStatusDisplay from "./VideoStatusDisplay.js";
 
-export default class EmbedMaker {
+export default class EmbedMaker extends DeferredManager {
     /**
      * Creates a YouTube iframe element for a video and/or playlist.
+     * The promise property will fulfil when the iframe is ready to play, and reject after a possible retry and when it can not be loaded.
      * @param {string|null} [videoId]
      * @param {string|null} [playlistId]
      * @param {boolean} [isJsApiEnabled]
      * @param {HTMLElement} [parentElement]
      * @param {HTMLElement} [statusDisplayElement]
      * @param {string} [statusDisplayLabel]
+     * @param {string} [iframeElementId]
+     * @param {number} [timestamp] 
      */
-    constructor(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement, statusDisplayLabel) {
+    constructor(videoId = null, playlistId = null, isJsApiEnabled = false, parentElement, statusDisplayElement, statusDisplayLabel, iframeElementId = 'youtubePlayer', timestamp) {
+        super();
         this.videoId = videoId;
         this.playlistId = playlistId;
         this.isJsApiEnabled = isJsApiEnabled;
         this.parentElement = parentElement;
         this.statusDisplayElement = statusDisplayElement;
         this.statusDisplayLabel = statusDisplayLabel;
+        this.iframeElementId = iframeElementId;
+        this.timestamp = timestamp;
         this.resetCount = 0;
         this.resetDisplay();
-        this.createYouTubeIframe();
+        this.iframeDetectionPromise = this.createYouTubeIframe();
     }
     
     /**
@@ -50,7 +57,40 @@ export default class EmbedMaker {
         const regex = /(?:\?|&)t=([a-zA-Z0-9_-]+)/;
         const match = url.match(regex);
         if (!match) return null;
-        return match[1] || null;
+        return parseInt(match[1]) || null;
+    }
+
+    /**
+     * 
+     * @param {string} url 
+     * @returns 
+     */
+    static extractYouTubeChannel(url) {
+        const regex = /youtube\.com\/channel\/([a-zA-Z0-9_-]+)/;
+        const match = url.match(regex);
+        if (!match) return null;
+        const channelId = match[1];
+        if (!channelId) return null;
+        const playlistId = channelId.replace(/^UC/, 'UU');
+        return playlistId || null;
+    }
+
+    /**
+     * 
+     * @param {string} url 
+     * @returns 
+     */
+    static decomposeUrl(url) {
+        let {videoId, playlistId} = EmbedMaker.extractYouTubeIds(url);
+        if (!videoId && !playlistId) {
+            playlistId = EmbedMaker.extractYouTubeChannel(url);
+        }
+        const timestamp = EmbedMaker.extractYouTubeTime(url);
+        return {
+            videoId,
+            playlistId,
+            timestamp
+        }
     }
 
     /**
@@ -62,9 +102,8 @@ export default class EmbedMaker {
      * @returns {Promise<HTMLIFrameElement>}
      */
     createYouTubeIframeFromUrl(url, isJsApiEnabled = false, parentElement, statusDisplayElement) {
-        const {videoId, playlistId} = EmbedMaker.extractYouTubeIds(url);
-        const videoTime = EmbedMaker.extractYouTubeTime(url);
-        return this.createYouTubeIframe(videoId, playlistId, isJsApiEnabled, parentElement, statusDisplayElement, true, videoTime);
+        const {videoId, playlistId, timestamp} = EmbedMaker.decomposeUrl(url);
+        return this.createYouTubeIframe(videoId, playlistId, isJsApiEnabled, parentElement, statusDisplayElement, true, timestamp);
     }
 
     /**
@@ -75,7 +114,7 @@ export default class EmbedMaker {
      * @param {HTMLElement} [parentElement]
      * @param {HTMLElement} [statusDisplayElement]
      * @param {boolean} [resetResetCount]
-     * @param {string|null} [videoTime]
+     * @param {number|null} [timestamp] 
      * @returns {Promise<HTMLIFrameElement>}
      */
     async createYouTubeIframe(
@@ -85,10 +124,11 @@ export default class EmbedMaker {
         parentElement = this.parentElement, 
         statusDisplayElement = this.statusDisplayElement,
         resetResetCount = true,
-        videoTime = this.videoTime ?? null
+        timestamp = this.timestamp ?? null
     ) {
         if (resetResetCount) {
             this.resetCount = 0;
+            this.resetPromise();
         }
         if (videoId && videoId !== this.videoId) {
             this.videoId = videoId;
@@ -96,20 +136,20 @@ export default class EmbedMaker {
         if (playlistId && playlistId !== this.playlistId) {
             this.playlistId = playlistId;
         }
-        if (videoTime && videoTime !== this.videoTime) {
-            this.videoTime = videoTime;
+        if (timestamp && timestamp !== this.timestamp) {
+            this.timestamp = timestamp;
         }
         this.isJsApiEnabled = isJsApiEnabled;
         this.parentElement = parentElement;
         this.statusDisplayElement = statusDisplayElement;
-        const newSrc = EmbedMaker.getSrc(playlistId, videoId, isJsApiEnabled, videoTime);
+        const newSrc = EmbedMaker.getSrc(playlistId, videoId, isJsApiEnabled, timestamp);
         if (this.iframe?.src && this.iframe?.src === newSrc) {
             // identical
             return this.iframe;
         }
         const iframe = document.createElement("iframe");
         this.iframe = iframe;
-        iframe.id = 'youtubePlayer';
+        iframe.id = this.iframeElementId;
         iframe.src = newSrc;
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
         iframe.allowFullscreen = true;
@@ -126,20 +166,32 @@ export default class EmbedMaker {
         if (this.display) {
             if (this.iframe) {
                 this.display.reset(this.iframe);
+                if (this.display) this.display.getPromise()
+                    .then(this.onVideoReady.bind(this))
+                    .catch(this.onVideoError.bind(this));
             }
         } else {
-            this.display = new VideoStatusDisplay(this.statusDisplayElement, this.iframe, this.statusDisplayLabel);
-            if (this.display) this.display.onError = this.onVideoError.bind(this);
+            this.display = new VideoStatusDisplay(this.statusDisplayElement, this.iframe, this.statusDisplayLabel, this.iframeElementId);
+            if (this.display) this.display.getPromise()
+                .then(this.onVideoReady.bind(this))
+                .catch(this.onVideoError.bind(this));
         }
     }
 
     onVideoError() {
         this.resetCount++;
         const resetAttempts = this.playlistId ? 1 : 0;
-        if (this.resetCount > resetAttempts) return;
+        if (this.resetCount > resetAttempts) {
+            this.reject();
+            return;
+        }
         const isPlaylistIncluded = this.resetCount !== 1;
         this.iframe?.remove();
         this.createYouTubeIframe(this.videoId, isPlaylistIncluded ? this.playlistId : null, undefined, undefined, undefined, false);
+    }
+
+    onVideoReady() {
+        this.resolve({iframe: this.iframe, display:this.display, player:this.display?.youtubePlayer});
     }
 
     destroy() {
@@ -152,17 +204,17 @@ export default class EmbedMaker {
      * @param {string|null} [playlistId] 
      * @param {string|null} [videoId] 
      * @param {boolean} [isJsApiEnabled] 
-     * @param {string|null} [videoTime]
+     * @param {number|null} [timestamp] 
      * @returns {string}
      */
-    static getSrc(playlistId = null, videoId = null, isJsApiEnabled = false, videoTime = null) {
+    static getSrc(playlistId = null, videoId = null, isJsApiEnabled = false, timestamp = null) {
         let src;
         const queriesArray = [];
         if (isJsApiEnabled) {
             queriesArray.push('enablejsapi=1');
         }
-        if (videoTime !== null) {
-            queriesArray.push(`t=${videoTime}`);
+        if (timestamp) {
+            queriesArray.push(`amp;start=${timestamp}`);
         }
         const queries = queriesArray.length === 0 ? '' : `?${queriesArray.join('&')}`;
         

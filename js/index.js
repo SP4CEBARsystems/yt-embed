@@ -23,7 +23,7 @@ function stripPageDown() {
 
 async function loadVideo() {
     const app = document.getElementById("app");
-    const {videoId, playlistId} = URIExtractor.getVideoParams();
+    const {videoId, playlistId, timestamp} = URIExtractor.getVideoParams();
     mainVideoId = videoId;
 
     if (!app) {
@@ -44,10 +44,16 @@ async function loadVideo() {
     const pElement = document.createElement('p');
     pElement.id = 'statusDisplay'
     document.querySelector('main')?.appendChild(pElement);
-    const iframeManager = new EmbedMaker(videoId, playlistId, true, container, pElement);
+    const iframeManager = new EmbedMaker(videoId, playlistId, true, container, pElement, undefined, undefined, timestamp ?? undefined);
+    // const iframeManager = new EmbedMaker(defaultYTId, null, true, this.iframeContainer ?? undefined, this.status ?? undefined, statusLabel, iframeElementId, defaultTimestamp);
     // leakTest(iframeManager, 10000000);
 }
 
+/**
+ * 
+ * @param {EmbedMaker} iframeManager 
+ * @param {number} count 
+ */
 function leakTest(iframeManager, count = 1000) {
     console.log('leaktest start')
     for (let index = 0; index < count; index++) {        

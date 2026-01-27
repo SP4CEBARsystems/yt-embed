@@ -1,3 +1,4 @@
+import DeferredManager from "./DeferredManager.js";
 /**
  * @typedef YTObject 
  * @property {new (...args: any[]) => YTPlayer|undefined} Player
@@ -9,7 +10,8 @@
  * @typedef {Window & typeof globalThis & YTAPI} WindowWithYTAPI
  */
 
-export default class VideoStatusDisplay {
+
+export default class VideoStatusDisplay extends DeferredManager {
     /** 
      * @typedef {Object} YTPlayer
      * @property {()=>any} destroy
@@ -19,18 +21,32 @@ export default class VideoStatusDisplay {
      */
     youtubePlayer
 
+    /** @type {'Playing'|'Paused'|'Ended'|'Buffering'|'Error'|'Unstarted'|'Ready'|'Stopped'|'Initializing'} */
+    status = 'Initializing';
+
+    /**
+     * @type {(()=>void) | undefined}
+     */
+    _onPlaying
+
+    /**
+     * @type {(()=>void) | undefined}
+     */
+    _onPaused
+
     /**
      * Creates a status display for YouTube embed iFrames that is updated by the youtube API
      * @param {HTMLElement} musicDetail 
      * @param {HTMLIFrameElement} [ytEl] 
-     * @param {string} label 
+     * @param {string} [label] 
+     * @param {string} [iframeElementId] 
      */
-    constructor(musicDetail, ytEl, label = 'Video: ') {
+    constructor(musicDetail, ytEl, label = 'Video: ', iframeElementId = 'youtubePlayer') {
+        super();
         this.ytEl = ytEl;
         this.musicDetail = musicDetail;
         this.label = label;
-        /** @type {Function|null} */
-        this.onError = null;
+        this.iframeElementId = iframeElementId;
         this.window = /** @type {WindowWithYTAPI} */(window);
         /** @type {Document} */
         this.document = document;
@@ -42,11 +58,28 @@ export default class VideoStatusDisplay {
 
     /**
      * 
+     * @param {(()=>void) | undefined} value 
+     */
+    setOnPlaying(value) {
+        this._onPlaying = value;
+    }
+
+    /**
+     * 
+     * @param {(()=>void) | undefined} value 
+     */
+    setOnPaused(value) {
+        this._onPaused = value;
+    }
+
+    /**
+     * 
      * @param {HTMLIFrameElement} ytEl 
      */
     reset(ytEl) {
         this.ytEl = ytEl;
         this.destroy();
+        this.resetPromise();
         this.enableJsApi();
         this.prepareCreatePlayer();
     }
@@ -112,7 +145,7 @@ export default class VideoStatusDisplay {
         if (!this.window.YT || !this.window.YT.Player) return;
         // avoid creating multiple players
         if (this.youtubePlayer) return;
-        this.youtubePlayer = new this.window.YT.Player('youtubePlayer', {
+        this.youtubePlayer = new this.window.YT.Player(this.iframeElementId, {
             events: {
                 /** @param {{target:{getPlayerState:Function}}} e */
                 onReady: (e) => {
@@ -138,6 +171,7 @@ export default class VideoStatusDisplay {
      * @param {boolean} isReady
      */
     setStatusText(state, isReady = false) {
+        /** @type {'Playing'|'Paused'|'Ended'|'Buffering'|'Error'|'Unstarted'|'Ready'|'Stopped'} */
         let status;
         switch (state) {
             case 1: status = 'Playing'; break;       // YT.PlayerState.PLAYING
@@ -145,12 +179,15 @@ export default class VideoStatusDisplay {
             case 0: status = 'Ended'; break;         // YT.PlayerState.ENDED
             case 3: status = 'Buffering'; break;     // YT.PlayerState.BUFFERING
             case -1: status = isReady ? 'Error' : 'Unstarted'; break;    // YT.PlayerState.UNSTARTED
-            default: status = 'Stopped';
+            default: status = isReady ? 'Ready' : 'Stopped';
         }
         this.musicDetail.textContent = `${this.label}${status}`;
-        const isError = isReady && state == -1;
-        if (isError) {
-            if (this?.onError) this?.onError();
+        this.status = status;
+        switch (status) {
+            case 'Ready': this.resolve(this.youtubePlayer); break;
+            case 'Error': this.reject(); break;
+            case 'Paused': if (this._onPaused) this._onPaused(); break;
+            case 'Playing': if (this._onPlaying) this._onPlaying(); break;
         }
     }
 }

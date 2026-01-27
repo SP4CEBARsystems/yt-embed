@@ -11,19 +11,26 @@ export default class URIExtractor {
         return params.get(name);
     }
 
+    /**
+     * 
+     * @returns {{videoId: string|null;playlistId: string|null;timestamp: number|null}}
+     */
     static parseVideoParam() {
         const videoUrl = this.getQueryParam("u");
         if (!videoUrl) return {
-            videoId: null, 
-            playlistId: null
+            videoId: null,
+            playlistId: null,
+            timestamp: null
         };
-        return EmbedMaker.extractYouTubeIds(videoUrl);
+        return EmbedMaker.decomposeUrl(videoUrl);
     }
 
     static getVideoParams() {
         const extractedIds = this.parseVideoParam();
         extractedIds.videoId = extractedIds.videoId ?? this.getQueryParam("v") ?? null;
         extractedIds.playlistId = extractedIds.playlistId ?? this.getQueryParam("list") ?? null;
+        const timestamp = extractedIds.playlistId ?? this.getQueryParam("t") ?? null;
+        extractedIds.timestamp = timestamp ? parseInt(timestamp) : null;
         return extractedIds;
     }
 }
