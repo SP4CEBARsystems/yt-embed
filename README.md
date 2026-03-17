@@ -1,8 +1,8 @@
-## New Application
+## YT Embed
 Hosts a YouTube embed, supports both (live) videos and playlists. Can parse most YouTube URLs. Can be used as an embed itself.
 
 ## Supported URI Parameters
-| Parameter | Example | Description |
+| Parameter | Description | Example |
 | --- | --- | --- |
 | u | Provide a YouTube URL to be parsed | https://www.youtube.com/watch?v=dQw4w9WgXcQ |
 | v | YouTube v (video ID) parameter | dQw4w9WgXcQ |
