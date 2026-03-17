@@ -11,7 +11,7 @@ Hosts a YouTube embed, supports both (live) videos and playlists. Can parse most
 Note: Any parameter provided to U containing "&" signs will be treated as a separate parameter by this website but that is not a big issue as both "v" and "list" are supported here as well.
 
 ## LeechBlock Configuration
-Using the LeechBlock browser extention, all youtube videos can be automatically redirected to this tool, below is the configuration to achieve that:
+Using the [LeechBlock browser extention](https://www.proginosko.com/leechblock/install/), all youtube videos can be automatically redirected to this tool, below is the configuration to achieve that:
 Find the field under `Enter the domain names of the sites to block (one item per line):` and paste the text below.
 ```
 *youtube.com/shorts
