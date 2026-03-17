@@ -9,7 +9,10 @@ Hosts a YouTube embed, supports both (live) videos and playlists. Can parse most
 | list | YouTube list (playlist ID) parameter | PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab |
 | minimal | Strip the page to just the iframe so this page can be embedded itself. | 1 |  
   
-Note: Any parameter provided to U containing "&" signs will be treated as a separate parameter by this website but that is not a big issue as both "v" and "list" are supported here as well.
+Note: Any value provided to the `U` parameter containing `&` signs will be treated as a separate parameter by this website but that is not a big issue as both YouTube's `v` and `list` parameters are supported here as well.
+
+## Support for youtube channel links
+providing a channel link like https://www.youtube.com/channel/UCNtSJKxSW7GsohL8g3aN_Zg to the `u` parameter, gets you an embed of the channel's public videos in a playlist. For example: https://sp4cebar.com/yt-embed/?minimal=1&u=https://www.youtube.com/channel/UCNtSJKxSW7GsohL8g3aN_Zg.
 
 ## LeechBlock Configuration
 Using the [LeechBlock browser extention](https://www.proginosko.com/leechblock/install/), all youtube videos can be automatically redirected to this tool, below is the configuration to achieve that:
