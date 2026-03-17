@@ -9,3 +9,16 @@ Hosts a YouTube embed, supports both (live) videos and playlists. Can parse most
 | list | YouTube list (playlist ID) parameter | PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab |
 | minimal | Strip the page to just the iframe so this page can be embedded itself. | 1 |
 Note: Any parameter provided to U containing "&" signs will be treated as a separate parameter by this website but that is not a big issue as both "v" and "list" are supported here as well.
+
+## LeechBlock Configuration
+Using the LeechBlock browser extention, all youtube videos can be automatically redirected to this tool, below is the configuration to achieve that:
+Find the field under `Enter the domain names of the sites to block (one item per line):` and paste the text below.
+```
+*youtube.com/shorts
+*youtube.com/watch
+youtu.be
+```
+Find the field under `Enter the fully specified URL of the page to show instead of these blocked sites:` and paste the text below.
+```
+https://sp4cebar.com/yt-embed?minimal=1&u=$U
+```
