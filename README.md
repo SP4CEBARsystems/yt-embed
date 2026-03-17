@@ -1,5 +1,5 @@
-## YT Embed
-Hosts a YouTube embed, supports both (live) videos and playlists. Can parse most YouTube URLs. Can be used as an embed itself.
+# YT Embed
+[YT Embed](https://sp4cebar.com/yt-embed/) hosts a YouTube embed, supports (live) videos, playlists, and channels. Can parse most YouTube URLs. Can be used as an embed itself.
 
 ## Supported URI Parameters
 | Parameter | Description | Example |
