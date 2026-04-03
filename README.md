@@ -26,3 +26,5 @@ Find the field under `Enter the fully specified URL of the page to show instead 
 ```
 https://sp4cebar.com/yt-embed?minimal=1&u=$U
 ```
+
+Alternatively, you could copy the [leachblock configuration that I use](https://github.com/SP4CEBARsystems/leechblock-configuration).
